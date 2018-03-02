@@ -1,0 +1,25 @@
+@import "../../../node_modules/react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
+
+.form.accounts-ui{
+  .button.google{
+    background-color: #ea4240;
+    color: #FFF;
+  }
+
+  .password-or-service{
+    margin-bottom: -10px;
+    margin-top: 10px;
+  }
+
+  .social-buttons{
+    .button{
+      margin-top: 10px;
+    }
+  }
+
+  .messages{
+    > div:first-child{
+      margin-top: 10px;
+    }
+  }
+}
