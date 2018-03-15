@@ -4,6 +4,7 @@ import React, { Component, PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { Message, Icon } from 'semantic-ui-react';
 import SimpleSchema from 'simpl-schema';
+import _ from 'lodash';
 
 export default class EditForm extends Component {
   constructor(props, fields) {
@@ -13,12 +14,18 @@ export default class EditForm extends Component {
       values: {},
       errors: {
         fields: {},
+        all: [],
         count: 0,
       }
     };
 
     if(this.isNew()){
-      // ToDo: populate with default values from schema
+      // Populate with default values from schema
+      const schema = props.collection.simpleSchema().schema();
+      fields.forEach((field) => {
+        const value = _.get(schema[field], 'form.defaultValue', undefined);
+        _.set(this.state.values, field, value);
+      });
     }else{
       // populate with existing data from document
       fields.forEach((field) => {
@@ -32,7 +39,8 @@ export default class EditForm extends Component {
   }
 
   updateValue = (name, value) => {
-    this.setState({ values: { ...this.state.values, [name]: value }});
+    // is JSON the fastest way to deep clone?
+    this.setState(state => _.set(JSON.parse(JSON.stringify(state)), 'values.' + name, value));
   }
 
   handleChange = (e, { name, value, type, checked, values, names }) => {
@@ -41,11 +49,12 @@ export default class EditForm extends Component {
       case 'checkbox':
         this.updateValue(name, checked);
         break;
+      case 'radio':
+        this.updateValue(name, value);
+        break;
       case 'airbnb-date-range-picker':
-        this.setState({ values: { ...this.state.values,
-          [names[0]]: values.startDate?values.startDate.toDate():null,
-          [names[1]]: values.endDate?values.endDate.toDate():null,
-        }});
+        this.updateValue(names.start, values.startDate?values.startDate.toDate():null);
+        this.updateValue(names.end, values.endDate?values.endDate.toDate():null);
         break;
       default:
         this.updateValue(name, value);
@@ -55,7 +64,12 @@ export default class EditForm extends Component {
 
   mapSchemaErrorToMessage = (e, schema) => {
     const { value, type } = e;
-    const name = schema.label(e.name);
+    let name = schema.label(e.name);
+    if(!name){
+      // Capilize the last part of the name, eg: "Units" for data.units
+      name = e.name.replace(/.*\.(.*)/, '$1');
+      name = name.charAt(0).toUpperCase() + name.slice(1);
+    }
 
     switch (type) {
       case 'required':
@@ -73,7 +87,7 @@ export default class EditForm extends Component {
       case 'maxDate':
         return `${name} must be earlier.`;
       case 'badDate':
-        return `${name} is not a valid date.`;
+        return `"${name}" is not a valid date.`;
       case 'minCount':
         return `${name} has too few entries.`;
       case 'maxCount':
@@ -97,7 +111,7 @@ export default class EditForm extends Component {
       case 'regEx':
         return `${name} failed RegEx test.`;
       default:
-        return `${value} is not a valid value for ${name}.`;
+        return `"${value}" is not a valid value for ${name}.`;
     }
   }
 
@@ -107,21 +121,24 @@ export default class EditForm extends Component {
 
   validateDocument = () => {
     const schema = this.props.collection.simpleSchema();
-    const values = schema.clean({...this.state.values});
+    const values = schema.clean(this.state.values);
 
     const validationContext = schema.newContext();
     validationContext.validate(values);
     const schemaErrors = validationContext.validationErrors();
     const errors = {
       fields: {},
+      all: [],
       count: schemaErrors.length,
     }
 
     schemaErrors.forEach((error) => {
-      errors.fields[error.name] = {
-        message: this.mapSchemaErrorToMessage(error, schema),
+      error = {
+        message: error.message || this.mapSchemaErrorToMessage(error, schema),
         ...error,
-      }
+      };
+      _.set(errors.fields, error.name, error);
+      errors.all.push(error);
     });
 
     this.setState({errors});
@@ -179,18 +196,28 @@ export default class EditForm extends Component {
     console.error(error);
 
     const errors = {
-      generic: [],
+      fields: {},
+      all: [],
       count: 0,
     }
 
     if(error.graphQLErrors){
       error.graphQLErrors.forEach((graphQLError) => {
+        if(!graphQLError.data){
+          errors.count = errors.count + 1;
+          errors.all.push({
+            message: graphQLError.message,
+            ...graphQLError,
+          });
+          return;
+        }
+
         graphQLError.data.errors.forEach((error) => {
           errors.count = errors.count + 1;
-          errors.generic.push({
+          errors.all.push({
             message: error.data.message?error.data.message:'Field "' + error.data.fieldName + '" has error "' + error.id + '"',
             ...error,
-          })
+          });
         })
       })
     }
@@ -211,32 +238,22 @@ export default class EditForm extends Component {
 
     const messages = [];
 
-    for(var key in errors.fields){
-      const error = errors.fields[key];
-
+    errors.all.forEach(error => {
+      const key = error.name && error.type?error.name + '__' + error.type:error.message;
       messages.push(
-        <Message icon error key={error.name + '__' + error.type}>
+        <Message icon error key={key}>
           <Icon name="dont" />
           <Message.Content>
             {error.message}
           </Message.Content>
         </Message>
       );
-    }
-
-    if(errors.generic){
-      errors.generic.forEach((error) => {
-        messages.push(
-          <Message icon error key={error.data.fieldName + '__' + error.data.type}>
-            <Icon name="dont" />
-            <Message.Content>
-              {error.message}
-            </Message.Content>
-          </Message>
-        );
-      });
-    }
+    });
 
     return messages;
   }
+}
+
+EditForm.propTypes = {
+  collection: PropTypes.object.isRequired,
 }

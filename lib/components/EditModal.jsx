@@ -5,7 +5,7 @@ import { Modal, Button, Icon, Confirm } from 'semantic-ui-react';
 import { withRouter } from 'react-router';
 
 class EditModal extends Component {
-  state = { modalOpen: false }
+  state = { modalOpen: false, deleteConfirmOpen: false }
 
   handleOpen = () => this.setState({ modalOpen: true })
 
@@ -34,7 +34,7 @@ class EditModal extends Component {
     this.setState({deleteConfirmOpen: false});
   }
 
-  handleDeleteCancel = (record) => {
+  handleDeleteCancel = () => {
     this.setState({deleteConfirmOpen: false});
   }
 
@@ -62,19 +62,19 @@ class EditModal extends Component {
         </Modal.Content>
         <Modal.Actions>
           <Button color='grey' onClick={this.handleClose}><Icon name='cancel' />Cancel</Button>
-          {(showDelete && this.props.document)?<Button color='red' onClick={this.handleDeleteRequest}><Icon name='trash' />Delete</Button>:null}
+          {showDelete?<Button color='red' onClick={this.handleDeleteRequest}><Icon name='trash' />Delete</Button>:null}
           <Button color='green' onClick={this.handleSave}><Icon name='save' />Save</Button>
         </Modal.Actions>
 
-        {this.props.showDelete?
+        {showDelete?
           <Confirm
             open={this.state.deleteConfirmOpen}
             onCancel={this.handleDeleteCancel}
             onConfirm={this.handleDeleteConfirm}
             content={this.props.deleteQuestion}
-            header={this.props.deleteHeader}
-            confirmButton='Delete'
-            cancelButton='Cancel'
+            header={this.props.deleteTitle}
+            confirmButton="Delete"
+            cancelButton="Cancel"
           />:null}
       </Modal>
     )
