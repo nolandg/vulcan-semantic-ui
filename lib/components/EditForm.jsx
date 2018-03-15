@@ -1,9 +1,7 @@
 import { Components, registerComponent } from 'meteor/vulcan:core';
-import { Utils } from 'meteor/vulcan:lib';
 import React, { Component, PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { Message, Icon } from 'semantic-ui-react';
-import SimpleSchema from 'simpl-schema';
 import _ from 'lodash';
 
 export default class EditForm extends Component {
@@ -44,22 +42,19 @@ export default class EditForm extends Component {
   }
 
   handleChange = (e, { name, value, type, checked, values, names }) => {
-    let stateValue;
     switch (type) {
       case 'checkbox':
         this.updateValue(name, checked);
-        break;
-      case 'radio':
-        this.updateValue(name, value);
         break;
       case 'airbnb-date-range-picker':
         this.updateValue(names.start, values.startDate?values.startDate.toDate():null);
         this.updateValue(names.end, values.endDate?values.endDate.toDate():null);
         break;
+      case 'radio':
+      case 'location-autocomplete':
       default:
         this.updateValue(name, value);
     }
-
   }
 
   mapSchemaErrorToMessage = (e, schema) => {
@@ -150,7 +145,7 @@ export default class EditForm extends Component {
     if(!this.validateDocument()){
       return;
     }
-
+    console.log(this.state);
     const values = this.props.collection.simpleSchema().clean({...this.state.values});
     const documentId = this.props.document?this.props.document._id:undefined;
     const mutationOptions = {

@@ -18,6 +18,7 @@ Package.onUse(function (api) {
   ]);
 
   api.addAssets([
+    'lib/assets/images/powered_by_google_default.png',
   ], ['client']);
 
   api.addAssets([
