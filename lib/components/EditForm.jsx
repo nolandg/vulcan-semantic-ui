@@ -145,7 +145,6 @@ export default class EditForm extends Component {
     if(!this.validateDocument()){
       return;
     }
-    console.log(this.state);
     const values = this.props.collection.simpleSchema().clean({...this.state.values});
     const documentId = this.props.document?this.props.document._id:undefined;
     const mutationOptions = {

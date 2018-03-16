@@ -43,9 +43,35 @@ class WrappedPlacesAutocomplete extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      address: '',
+      address: props.value ? props.value.text || '' : '',
       geocodeResults: null,
       loading: false,
+    };
+  }
+
+  getNiceLocationData = (result) => {
+    let airport;
+    let city, state, country;
+
+    result.address_components.forEach(c => {
+      c.types.forEach(t => {
+        if(t === 'airport') airport = c.short_name;
+        if(t === 'locality') city = c.short_name;
+        if(t === 'administrative_area_level_1') state = c.short_name;
+        if(t === 'country') country = c.short_name;
+      });
+    });
+
+    let text = airport;
+    if(!text && city && state && country) text = `${city}, ${state}, ${country}`;
+    else if(!text) text = result.formatted_address;
+
+    return {
+      lat: result.geometry.location.lat(),
+      lng: result.geometry.location.lng(),
+      placeId: result.place_id,
+      longText: result.formatted_address,
+      text,
     };
   }
 
@@ -55,30 +81,24 @@ class WrappedPlacesAutocomplete extends Component {
       loading: true,
     });
 
-    geocodeByAddress(address)
-      .then(results => {
-        const result = results[0];
-        if(result){
-          const value = {
-            lat: result.geometry.location.lat(),
-            lng: result.geometry.location.lng(),
-            placeId: result.place_id,
-            text: result.formatted_address,
-          };
-          if(this.props.onChange){
-            this.props.onChange(null, {type: 'location-autocomplete', name: this.props.name, value});
-          }
+  geocodeByAddress(address)
+    .then(results => {
+      if(results[0]){
+        const value = this.getNiceLocationData(results[0]);
+        if(this.props.onChange){
+          this.props.onChange(null, {type: 'location-autocomplete', name: this.props.name, value});
         }
-        this.setState({
-          loading: false,
-        });
-      })
-      .catch(error => {
-        console.error('Geocode Error', error);
-        this.setState({
-          loading: false,
-        });
+      }
+      this.setState({
+        loading: false,
       });
+    })
+    .catch(error => {
+      console.error('Geocode Error', error);
+      this.setState({
+        loading: false,
+      });
+    });
   }
 
   handleChange = (address) => {

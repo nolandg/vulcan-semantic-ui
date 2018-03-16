@@ -72,7 +72,12 @@ const FormField = (props) => {
       endDate: _.get(values, endName),
     };
   }else{
-    params = { ... params, name, value: componentSpecificValue };
+    params = {
+      ...params,
+      name,
+      value: componentSpecificValue,
+      style: widthEm?{maxWidth: widthEm + 'em'}:undefined,
+    };
   }
 
   let hasError = !!_.get(errors.fields, name);
@@ -81,7 +86,7 @@ const FormField = (props) => {
   }
 
   return (
-    <Form.Field error={hasError} style={widthEm?{width: widthEm + 'em'}:null}>
+    <Form.Field error={hasError}>
       {!isCheckbox && label?<label>{label}</label>:null}
       <Component {...rest} {...params} />
       {description?<p>{description}</p>:null}
