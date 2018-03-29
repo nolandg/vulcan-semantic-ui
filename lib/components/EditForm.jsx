@@ -14,7 +14,8 @@ export default class EditForm extends Component {
         fields: {},
         all: [],
         count: 0,
-      }
+      },
+      submissionAttempted: false,
     };
 
     if(this.isNew()){
@@ -54,6 +55,12 @@ export default class EditForm extends Component {
       case 'location-autocomplete':
       default:
         this.updateValue(name, value);
+    }
+  }
+
+  componentDidUpdate = (prevProps, prevState) => {
+    if(this.state.submissionAttempted && !_.isEqual(prevState.values, this.state.values)){
+      this.validateDocument();
     }
   }
 
@@ -104,7 +111,7 @@ export default class EditForm extends Component {
       case 'expectedConstructor':
         return `${name} must be a constructor.`;
       case 'regEx':
-        return `${name} failed RegEx test.`;
+        return `${name} does not appear to be valid.`;
       default:
         return `"${value}" is not a valid value for ${name}.`;
     }
@@ -142,6 +149,8 @@ export default class EditForm extends Component {
   }
 
   submit = () => {
+    this.setState({submissionAttempted: true});
+
     if(!this.validateDocument()){
       return;
     }
@@ -154,10 +163,10 @@ export default class EditForm extends Component {
 
     if(this.isNew()){
       this.props.newMutation({...mutationOptions, document: values})
-        .catch(this.handleMutationError).then(this.handleMutationSuccess).done(this.handleMutationDone);
+        .catch(this.handleMutationError).then(this.handleMutationSuccess);
     }else{
       this.props.editMutation({...mutationOptions, documentId, set: values})
-        .catch(this.handleMutationError).then(this.handleMutationSuccess).done(this.handleMutationDone);
+        .catch(this.handleMutationError).then(this.handleMutationSuccess);
     }
   }
 
@@ -168,7 +177,9 @@ export default class EditForm extends Component {
       currentUser: this.props.currentUser,
     }
     this.props.removeMutation({...mutationOptions, documentId})
-      .then(() => { if(this.props.documentRemoved) this.props.documentRemoved() })
+      .then(() => {
+        if(this.props.documentDeleted) this.props.documentDeleted()
+      })
       .catch(this.handleMutationError);
   }
 
@@ -180,10 +191,6 @@ export default class EditForm extends Component {
     this.clearErrors();
     if(this.props.onSuccess) this.props.onSuccess();
     if(this.props.closeModal) this.props.closeModal();
-  }
-
-  handleMutationDone = () => {
-    if(this.props.onDone) this.props.onDone();
   }
 
   handleMutationError = (error) => {
@@ -208,10 +215,16 @@ export default class EditForm extends Component {
 
         graphQLError.data.errors.forEach((error) => {
           errors.count = errors.count + 1;
-          errors.all.push({
-            message: error.data.message?error.data.message:'Field "' + error.data.fieldName + '" has error "' + error.id + '"',
-            ...error,
-          });
+          let message;
+          if(error.data && error.date.message)
+            message = error.data.message;
+          else if(error.data)
+            message = `Field "${error.data.fieldName}" has error "${error.id}".`;
+          else if(error.fieldName)
+            message = `Field "${error.fieldName}" has error "${error.id}".`;
+          else
+            message = `Unknown error "${error.id}"`;
+          errors.all.push({message, ...error});
         })
       })
     }

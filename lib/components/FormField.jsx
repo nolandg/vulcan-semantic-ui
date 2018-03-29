@@ -1,7 +1,7 @@
 
 import { Components, registerComponent } from 'meteor/vulcan:core';
 import React, { Component as ReactComponent} from 'react';
-import { Form, Input, Select, Checkbox } from 'semantic-ui-react';
+import { Form, Input, Select, Checkbox, Icon } from 'semantic-ui-react';
 import { DateRangePicker as ReactDateRangePicker } from 'react-dates';
 import moment from 'moment';
 import _ from 'lodash';
@@ -25,11 +25,12 @@ class DateRangePicker extends ReactComponent {
   state = {focusedInput: null}
 
   render() {
-    const { startDate, endDate, startName, endName, onChange, ...rest } = this.props;
+    const { startDate, endDate, startName, endName, onChange, initialMonth, ...rest } = this.props;
 
     return (
       <ReactDateRangePicker
         {...rest}
+        initialVisibleMonth={() => initialMonth || moment()}
         startDate={startDate?moment(startDate):null} // momentPropTypes.momentObj or null,
         startDateId="startDateId" // PropTypes.string.isRequired,
         endDate={endDate?moment(endDate):null} // momentPropTypes.momentObj or null,
@@ -40,8 +41,11 @@ class DateRangePicker extends ReactComponent {
         onFocusChange={focusedInput => this.setState({ focusedInput })} // PropTypes.func.isRequired,
         noBorder={true}
         showClearDates={true}
-        transitionDuration={500}
+        transitionDuration={200}
+        reopenPickerOnClearDates={true}
         isOutsideRange={() => false}
+        displayFormat="MMM DD, YYYY"
+        numberOfMonths={3}
       />
     );
   }
@@ -53,32 +57,42 @@ DateRangePicker.defaultProps = {
 registerComponent('DateRangePicker', DateRangePicker);
 
 const FormField = (props) => {
-  const { errors, name, label, Component, description, value, values, startName, endName, widthEm, ...rest } = props;
+  const { errors, name, label, labelAs, labelIcon, labelIconSize, Component, description, value, values, startName, endName, widthEm, ...rest } = props;
   const isCheckbox = Component.name === 'Checkbox';
   const isDateRangePicker = Component.name === 'DateRangePicker';
+  const LabelComponentName = labelAs;
 
-  let componentSpecificValue = value;
-  if(!isCheckbox) componentSpecificValue = _.get(values, name);
   let params = {};
 
-  if(isCheckbox) params = { ...params,
-    checked: _.get(values, name) === value,
-    label,
-  };
+  let labelIconComponent;
+  if(labelIcon === null)
+    labelIconComponent = <Icon size={labelIconSize || undefined} style={{width: 0}} />
+  else if(labelIcon)
+    labelIconComponent = <Icon size={labelIconSize || undefined} className={labelIcon} />
+
+  const labelComponent = <LabelComponentName>{labelIconComponent}{label}</LabelComponentName>;
 
   if(isDateRangePicker) {
     params = { ...params, startName, endName,
       startDate: _.get(values, startName),
       endDate: _.get(values, endName),
     };
-  }else{
+  }
+
+  if(!isDateRangePicker){
     params = {
       ...params,
       name,
-      value: componentSpecificValue,
+      value: _.get(values, name, ''),
       style: widthEm?{maxWidth: widthEm + 'em'}:undefined,
     };
   }
+
+  if(isCheckbox) params = { ...params,
+    value: value,
+    checked: _.get(values, name) === value,
+    label: labelComponent,
+  };
 
   let hasError = !!_.get(errors.fields, name);
   if(isDateRangePicker){
@@ -87,7 +101,7 @@ const FormField = (props) => {
 
   return (
     <Form.Field error={hasError}>
-      {!isCheckbox && label?<label>{label}</label>:null}
+      {!isCheckbox && label?labelComponent:null}
       <Component {...rest} {...params} />
       {description?<p>{description}</p>:null}
     </Form.Field>
@@ -95,5 +109,7 @@ const FormField = (props) => {
 }
 FormField.defaultProps = {
   Component: Input,
+  labelAs: 'label',
+  labelIconSize: 'big',
 }
 registerComponent('FormField', FormField);

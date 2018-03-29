@@ -37,7 +37,8 @@
     "no-unused-vars": [1, {
       "vars": "all",
       "args": "none",
-      "varsIgnorePattern": "React|PropTypes|Component"
+      "varsIgnorePattern": "React|PropTypes|Component",
+      "ignoreRestSiblings": true
     }],
     "no-console": 0,
     "react/prop-types": 0,

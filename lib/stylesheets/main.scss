@@ -1,21 +1,33 @@
 @import "../../../node_modules/react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 @import "location-field.scss";
 
-// const colors = {
-//   red: '#db2828',
-//   orange: '#f2711c',
-//   yellow: '#fbbd08',
-//   olive: '#b5cc18',
-//   green: '#21ba45',
-//   teal: '#00b5ad',
-//   blue: '#2185d0',
-//   violet: '#6435c9',
-//   purple: '#a333c8',
-//   pink: '#e03997',
-//   brown: '#a5673f',
-//   grey: '#767676',
-//   black: '#1b1c1d',
-// };
+$red: #db2828;
+$orange: #f2711c;
+$yellow: #fbbd08;
+$olive: #b5cc18;
+$green: #21ba45;
+$teal: #00b5ad;
+$blue: #2185d0;
+$violet: #6435c9;
+$purple: #a333c8;
+$pink: #e03997;
+$brown: #a5673f;
+$grey: #767676;
+$black: #1b1c1d;
+
+.edit-modal.ui.modal {
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+
+  > .header{
+    background-color: $blue;
+    color: #FFF;
+  }
+}
+
+.ui.icon.menu .item.disabled{
+  color: rgba(40,40,40,.3);
+}
 
 .form.accounts-ui{
   .button.google{
@@ -49,4 +61,8 @@
       margin-top: .1em;
     }
   }
+}
+
+.DateRangePicker_picker{
+  z-index: 10 !important;
 }

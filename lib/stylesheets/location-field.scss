@@ -50,8 +50,13 @@
     border-left: honeydew;
     border-right: honeydew;
     border-top: 1px solid #e6e6e6;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
     border-radius: 0 0 2px 2px;
+    position: absolute;
+    z-index: 100;
+    left: 0;
+    right: 0;
+    background-color: #FFF;
   }
 
   .Demo__suggestion-item {

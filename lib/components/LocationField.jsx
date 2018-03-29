@@ -127,6 +127,10 @@ class WrappedPlacesAutocomplete extends Component {
         onEnterKeyDown={this.handleSelect}
         onError={onError}
         shouldFetchSuggestions={shouldFetchSuggestions}
+        highlightFirstSuggestion={true}
+        options={{
+          types: ['geocode'],
+        }}
       />
     );
   }
