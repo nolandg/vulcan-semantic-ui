@@ -1,7 +1,7 @@
 Package.describe({
   name: "noland:vulcan-semantic-ui",
   summary: "Brings Semantic UI React to Vulcan",
-  version: '1.0.0',
+  version: '1.0.1',
 });
 
 Package.onUse(function (api) {
