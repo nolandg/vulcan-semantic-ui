@@ -7,17 +7,17 @@ import moment from 'moment';
 import _ from 'lodash';
 
 const CheckboxField = (props) => {
-  return <FormField Component={Checkbox} {...props} />;
+  return <FormField Component={Checkbox} componentType="Checkbox" {...props} />;
 }
 registerComponent('CheckboxField', CheckboxField);
 
 const SelectField = (props) => {
-  return <FormField Component={Select} {...props} />;
+  return <FormField Component={Select} componentType="Select" {...props} />;
 }
 registerComponent('SelectField', SelectField);
 
 const DateRangeField = (props) => {
-  return <FormField Component={DateRangePicker} {...props} />;
+  return <FormField Component={DateRangePicker} componentType="DateRange" {...props} />;
 }
 registerComponent('DateRangeField', DateRangeField);
 
@@ -57,9 +57,9 @@ DateRangePicker.defaultProps = {
 registerComponent('DateRangePicker', DateRangePicker);
 
 const FormField = (props) => {
-  const { errors, name, label, labelAs, labelIcon, labelIconSize, Component, description, value, values, startName, endName, widthEm, ...rest } = props;
-  const isCheckbox = Component.name === 'Checkbox';
-  const isDateRangePicker = Component.name === 'DateRangePicker';
+  const { componentType, errors, name, label, labelAs, labelIcon, labelIconSize, Component, description, value, values, startName, endName, widthEm, ...rest } = props;
+  const isCheckbox = componentType === 'Checkbox';
+  const isDateRangePicker = componentType === 'DateRange';
   const LabelComponentName = labelAs;
 
   let params = {};

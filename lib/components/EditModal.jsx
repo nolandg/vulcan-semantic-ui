@@ -28,7 +28,7 @@ class EditModal extends Component {
       this.documentDeleted();
     }
     if(this.props.redirectOnDelete){
-      this.props.router.transitionTo(this.props.router.createLocation(this.props.redirectOnDelete));
+      this.props.router.push(this.props.redirectOnDelete);
     }
   }
 
