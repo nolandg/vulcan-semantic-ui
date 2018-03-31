@@ -30,13 +30,13 @@ class RichTextEditor extends Component {
     super(props);
 
     let editorState;
-    if(this.props.value === null){
+    if(props.value === null){
       editorState = EditorState.createEmpty();
     }else{
       try{
-        editorState = EditorState.createWithContent(convertFromRaw(JSON.parse(this.props.value)));
+        editorState = EditorState.createWithContent(convertFromRaw(JSON.parse(props.value)));
       }catch(err){
-        editorState = EditorState.createWithContent(ContentState.createFromText(this.props.value));
+        editorState = EditorState.createWithContent(ContentState.createFromText(props.value));
       }
     }
 
@@ -84,6 +84,7 @@ class RichTextEditor extends Component {
         editorClassName="rte-editor"
         onEditorStateChange={this.onEditorStateChange}
         toolbar={toolbar}
+        placeholder={this.props.placeholder}
       />
     )
   }

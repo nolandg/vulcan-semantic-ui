@@ -1,4 +1,4 @@
-import { Components, registerComponent } from 'meteor/vulcan:core';
+import { Components, registerComponent, getCollection } from 'meteor/vulcan:core';
 import React, { Component, PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { Message, Icon } from 'semantic-ui-react';
@@ -16,11 +16,12 @@ export default class EditForm extends Component {
         count: 0,
       },
       submissionAttempted: false,
+      collection: typeof props.collection === 'object' ? props.collection : getCollection(props.collection),
     };
 
     if(this.isNew()){
       // Populate with default values from schema
-      const schema = props.collection.simpleSchema().schema();
+      const schema = this.state.collection.simpleSchema().schema();
       fields.forEach((field) => {
         const value = _.get(schema[field], 'form.defaultValue', undefined);
         _.set(this.state.values, field, value);
@@ -39,7 +40,11 @@ export default class EditForm extends Component {
 
   updateValue = (name, value) => {
     // is JSON the fastest way to deep clone?
-    this.setState(state => _.set(JSON.parse(JSON.stringify(state)), 'values.' + name, value));
+    this.setState(state => {
+      const values = JSON.parse(JSON.stringify(state.values));
+      _.set(values, name, value);
+      return {values};
+    });
   }
 
   handleChange = (e, { name, value, type, checked, values, names }) => {
@@ -122,7 +127,7 @@ export default class EditForm extends Component {
   }
 
   validateDocument = () => {
-    const schema = this.props.collection.simpleSchema();
+    const schema = this.state.collection.simpleSchema();
     const values = schema.clean(this.state.values);
 
     const validationContext = schema.newContext();
@@ -154,7 +159,7 @@ export default class EditForm extends Component {
     if(!this.validateDocument()){
       return;
     }
-    const values = this.props.collection.simpleSchema().clean({...this.state.values});
+    const values = this.state.collection.simpleSchema().clean({...this.state.values});
     const documentId = this.props.document?this.props.document._id:undefined;
     const mutationOptions = {
       validate: true,
@@ -262,5 +267,5 @@ export default class EditForm extends Component {
 }
 
 EditForm.propTypes = {
-  collection: PropTypes.object.isRequired,
+  collection: PropTypes.oneOfType([PropTypes.object, PropTypes.string]).isRequired,
 }

@@ -6,6 +6,11 @@ import { DateRangePicker as ReactDateRangePicker } from 'react-dates';
 import moment from 'moment';
 import _ from 'lodash';
 
+const RichTextField = (props) => {
+  return <FormField Component={Components.RichTextEditor} componentType="RichTextEditor" {...props} />;
+}
+registerComponent('RichTextField', RichTextField);
+
 const CheckboxField = (props) => {
   return <FormField Component={Checkbox} componentType="Checkbox" {...props} />;
 }

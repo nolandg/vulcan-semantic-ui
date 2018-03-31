@@ -65,7 +65,7 @@ class EditModal extends Component {
         className="edit-modal"
       >
         <Header style={color?{backgroundColor: `${color}`, color: '#FFF'}:null}>
-          <Icon className={icon} />
+          {icon?<Icon className={icon} />:null}
           <Header.Content>
             {title}
           </Header.Content>
