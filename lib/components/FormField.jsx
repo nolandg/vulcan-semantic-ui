@@ -62,7 +62,7 @@ DateRangePicker.defaultProps = {
 registerComponent('DateRangePicker', DateRangePicker);
 
 const FormField = (props) => {
-  const { componentType, errors, name, label, labelAs, labelIcon, labelIconSize, Component, description, value, values, startName, endName, widthEm, ...rest } = props;
+  const { type, componentType, errors, name, label, labelAs, labelIcon, labelIconSize, Component, description, value, values, startName, endName, widthEm, ...rest } = props;
   const isCheckbox = componentType === 'Checkbox';
   const isDateRangePicker = componentType === 'DateRange';
   const LabelComponentName = labelAs;
@@ -94,7 +94,6 @@ const FormField = (props) => {
   }
 
   if(isCheckbox) params = { ...params,
-    value: value,
     checked: _.get(values, name) === value,
     label: labelComponent,
   };
@@ -104,10 +103,13 @@ const FormField = (props) => {
     hasError = !!(_.get(errors.fields, startName) || _.get(errors.fields, endName));
   }
 
+  if(isCheckbox && (type === 'radio')) params.value = value;
+  else if(isCheckbox) params.value = undefined;
+
   return (
     <Form.Field error={hasError}>
       {!isCheckbox && label?labelComponent:null}
-      <Component {...rest} {...params} />
+      <Component {...rest} {...params} type={type}/>
       {description?<p>{description}</p>:null}
     </Form.Field>
   );

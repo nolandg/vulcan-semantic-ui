@@ -21,8 +21,6 @@ export class AccountsFormMessage extends Component {
     if(type === 'warning') icon = 'exclamation triangle';
     if(type === 'success') icon = 'check';
 
-    console.log('Accounts message type and icon: ' + type + ' ' + icon);
-
     return (
       <Message error={type!=='success'} success={type==='success'} onDismiss={this.handleDismiss}>
         <Icon name={icon} />

@@ -16,6 +16,14 @@ $brown: #a5673f;
 $grey: #767676;
 $black: #1b1c1d;
 
+.ui.comments .comment{
+  display: flex !important;
+  align-items: center;
+  .content{
+    margin-left: 10px !important;
+  }
+}
+
 .edit-modal.ui.modal {
   border-top-left-radius: 10px;
   border-top-right-radius: 10px;
