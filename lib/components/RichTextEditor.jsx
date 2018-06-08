@@ -82,7 +82,7 @@ class RichTextEditor extends Component {
     const { editorState } = this.state;
 
     const toolbar = {
-      options:   ['inline', 'colorPicker', 'blockType', 'list', 'image', 'textAlign', 'link', 'history'],
+      options:   ['inline', 'colorPicker', 'blockType', 'list', 'image', 'embedded', 'textAlign', 'link', 'history'],
       inline: {
         options: ['bold', 'italic', 'underline', 'strikethrough', 'superscript', 'subscript'],
       },
@@ -92,9 +92,19 @@ class RichTextEditor extends Component {
       list: {
         options: ['unordered', 'ordered'],
       },
+      embedded: {
+        defaultSize: {
+          height: 'auto',
+          width: '100%',
+        },
+      },
       image: {
         uploadCallback: uploadImageCallBack,
-        alt: { present: false, mandatory: false }
+        alt: { present: false, mandatory: false },
+        defaultSize: {
+          height: 'auto',
+          width: '100%',
+        },
       },
     };
 
