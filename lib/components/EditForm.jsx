@@ -166,7 +166,8 @@ export default class EditForm extends Component {
       currentUser: this.props.currentUser,
     }
 
-    if(this.isNew()){
+    if(this.isNew() || this.props.saveAsNew){
+      values._id = undefined;
       this.props.newMutation({...mutationOptions, document: values})
         .catch(this.handleMutationError).then(this.handleMutationSuccess);
     }else{

@@ -4,6 +4,30 @@ import React, { Component } from 'react';
 import { EditorState, ContentState, convertFromRaw, convertToRaw } from 'draft-js';
 import { Editor } from 'react-draft-wysiwyg';
 import { stateToHTML } from 'draft-js-export-html';
+import { getSetting } from 'meteor/vulcan:lib';
+
+function uploadImageCallBack(file) {
+  return new Promise(
+    (resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      const imgurClientId = getSetting('imgurClientId');
+
+      xhr.open('POST', 'https://api.imgur.com/3/image');
+      xhr.setRequestHeader('Authorization', `Client-ID ${imgurClientId}`);
+      const data = new FormData();
+      data.append('image', file);
+      xhr.send(data);
+      xhr.addEventListener('load', () => {
+        const response = JSON.parse(xhr.responseText);
+        resolve(response);
+      });
+      xhr.addEventListener('error', () => {
+        const error = JSON.parse(xhr.responseText);
+        reject(error);
+      });
+    }
+  );
+}
 
 const stateToHTMLOptions = {
   blockStyleFn: (block) => {
@@ -30,7 +54,7 @@ class RichTextEditor extends Component {
     super(props);
 
     let editorState;
-    if(props.value === null){
+    if((props.value === null) || (props.value === undefined)){
       editorState = EditorState.createEmpty();
     }else{
       try{
@@ -39,33 +63,26 @@ class RichTextEditor extends Component {
         editorState = EditorState.createWithContent(ContentState.createFromText(props.value));
       }
     }
-
-    this.state = {
-      editorState,
-    };
-
+    this.state = {editorState};
     this.callParentOnChange();
   }
 
   callParentOnChange = () => {
+    const value = JSON.stringify(convertToRaw(this.state.editorState.getCurrentContent()));
     if(this.props.onChange){
-      this.props.onChange(null, {name: this.props.name, value: JSON.stringify(convertToRaw(this.state.editorState.getCurrentContent()))});
+      this.props.onChange(null, {name: this.props.name, value});
     }
   }
 
   onEditorStateChange = (editorState) => {
-    this.setState({
-      editorState,
-    });
-
-    this.callParentOnChange();
+    this.setState({editorState}, () => {this.callParentOnChange();});
   };
 
   render() {
     const { editorState } = this.state;
 
     const toolbar = {
-      options:   ['inline', 'blockType', 'list', 'textAlign', 'link', 'history'],
+      options:   ['inline', 'colorPicker', 'blockType', 'list', 'image', 'textAlign', 'link', 'history'],
       inline: {
         options: ['bold', 'italic', 'underline', 'strikethrough', 'superscript', 'subscript'],
       },
@@ -74,6 +91,10 @@ class RichTextEditor extends Component {
       },
       list: {
         options: ['unordered', 'ordered'],
+      },
+      image: {
+        uploadCallback: uploadImageCallBack,
+        alt: { present: false, mandatory: false }
       },
     };
 

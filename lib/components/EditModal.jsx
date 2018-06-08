@@ -7,7 +7,10 @@ import { withRouter } from 'react-router';
 class EditModal extends Component {
   state = { modalOpen: false, deleteConfirmOpen: false }
 
-  open = () => this.setState({ modalOpen: true })
+  open = (event) => {
+    event.stopPropagation();
+    this.setState({ modalOpen: true });
+  }
 
   close = () => {
     this.setState({ modalOpen: false });
