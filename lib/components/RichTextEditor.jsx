@@ -82,7 +82,7 @@ class RichTextEditor extends Component {
     const { editorState } = this.state;
 
     const toolbar = {
-      options:   ['inline', 'colorPicker', 'blockType', 'list', 'image', 'embedded', 'textAlign', 'link', 'history'],
+      options:   ['inline', 'blockType', 'list', 'image', 'embedded', 'textAlign', 'link', 'history'],
       inline: {
         options: ['bold', 'italic', 'underline', 'strikethrough', 'superscript', 'subscript'],
       },
